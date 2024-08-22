@@ -29,5 +29,4 @@ public class TransactionEntity {
         @JoinColumn(name = "account_id", nullable = false)
         private AccountEntity account;
 
-        // Getters and setters
 }

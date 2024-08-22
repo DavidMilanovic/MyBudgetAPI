@@ -1,11 +1,10 @@
 package com.productdock.RBCAccountProject;
 
 import org.modelmapper.ModelMapper;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
-import java.util.ArrayList;
 
 @SpringBootApplication
 public class RbcAccountProjectApplication {
@@ -19,6 +18,14 @@ public class RbcAccountProjectApplication {
 		ModelMapper mapper = new ModelMapper();
 		mapper.getConfiguration().setAmbiguityIgnored(true);
 		return mapper;
+	}
+
+	@Bean
+	public GroupedOpenApi publicApi() {
+		return GroupedOpenApi.builder()
+				.group("public")
+				.pathsToMatch("/**")
+				.build();
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.productdock.RBCAccountProject.services.impl;
 
+import com.productdock.RBCAccountProject.models.ConvertedMoney;
+import com.productdock.RBCAccountProject.models.CurrencyDate;
 import com.productdock.RBCAccountProject.services.CurrencyService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,6 @@ public class CurrencyServiceImpl implements CurrencyService {
     private String conversionUrlTemplate;
 
 
-
     @Override
     public Set<String> getAllCurrencies() {
         Map<String, String> currencies = restTemplate.getForObject(currenciesUrl, Map.class);
@@ -35,7 +36,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     @Override
-    public Double convertCurrency(String fromCurrency, String toCurrency, Double amount) {
+    public ConvertedMoney convertCurrency(String fromCurrency, String toCurrency, Double amount) {
         String fromCurrencyLower = fromCurrency.toLowerCase();
         String toCurrencyLower = toCurrency.toLowerCase();
 
@@ -48,7 +49,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 
             if (conversionRates.containsKey(toCurrencyLower)) {
                 Double conversionRate = conversionRates.get(toCurrencyLower);
-                return amount * conversionRate;
+                return new ConvertedMoney(amount * conversionRate);
             }
         }
 
@@ -56,7 +57,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     @Override
-    public Date getConversionDate(String defaultValue) {
+    public CurrencyDate getConversionDate(String defaultValue) {
         String conversionUrl = conversionUrlTemplate.replace("{currency}", defaultValue.toLowerCase());
 
         Map<String, Object> conversionData = restTemplate.getForObject(conversionUrl, Map.class);
@@ -66,7 +67,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 
             try {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                return dateFormat.parse(dateStr);
+                return new CurrencyDate(dateFormat.parse(dateStr));
             } catch (ParseException e) {
                 throw new IllegalArgumentException("Failed to parse conversion date", e);
             }
@@ -74,4 +75,6 @@ public class CurrencyServiceImpl implements CurrencyService {
 
         throw new IllegalArgumentException("Conversion date not available.");
     }
+
+
 }

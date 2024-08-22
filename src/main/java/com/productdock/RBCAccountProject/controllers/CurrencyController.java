@@ -1,9 +1,10 @@
 package com.productdock.RBCAccountProject.controllers;
 
+import com.productdock.RBCAccountProject.models.ConvertedMoney;
+import com.productdock.RBCAccountProject.models.CurrencyDate;
 import com.productdock.RBCAccountProject.services.CurrencyService;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.Set;
 
 @RestController
@@ -20,14 +21,15 @@ public class CurrencyController {
     public Set<String> getAllCurrencies(){
         return service.getAllCurrencies();
     }
+    
 
     @GetMapping("/{defaultCurrency}")
-    public Date getCurrentExchangeDate(@PathVariable String defaultCurrency){
+    public CurrencyDate getCurrentExchangeDate(@PathVariable String defaultCurrency){
         return service.getConversionDate(defaultCurrency);
     }
 
     @GetMapping("/convert/{from}-{to}-{amount}")
-    public Double convertCurrency(@PathVariable String from, @PathVariable String to, @PathVariable Double amount){
+    public ConvertedMoney convertCurrency(@PathVariable String from, @PathVariable String to, @PathVariable Double amount){
         return service.convertCurrency(from, to, amount);
     }
 }

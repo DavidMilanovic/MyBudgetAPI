@@ -1,6 +1,5 @@
 package com.productdock.RBCAccountProject.models.entities;
 
-import com.productdock.RBCAccountProject.models.entities.TransactionEntity;
 import lombok.Data;
 
 import jakarta.persistence.*;

@@ -3,6 +3,7 @@ package com.productdock.RBCAccountProject.controllers;
 import com.productdock.RBCAccountProject.exceptions.NotFoundException;
 import com.productdock.RBCAccountProject.models.Account;
 import com.productdock.RBCAccountProject.models.AccountRequest;
+import com.productdock.RBCAccountProject.models.AvailableMoney;
 import com.productdock.RBCAccountProject.services.AccountService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/accounts")
 public class AccountController {
 
     private final AccountService service;
@@ -26,6 +27,11 @@ public class AccountController {
     @GetMapping("/{id}")
     public Account findById(@PathVariable Integer id) throws NotFoundException {
         return service.findById(id);
+    }
+
+    @GetMapping("/availableMoney/{currency}")
+    public AvailableMoney getAvailableMoney(@PathVariable String currency){
+        return  service.getAvailableMoney(currency);
     }
 
     @PostMapping

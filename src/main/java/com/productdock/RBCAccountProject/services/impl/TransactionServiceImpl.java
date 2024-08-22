@@ -6,6 +6,7 @@ import com.productdock.RBCAccountProject.models.Account;
 import com.productdock.RBCAccountProject.models.AccountRequest;
 import com.productdock.RBCAccountProject.models.Transaction;
 import com.productdock.RBCAccountProject.models.TransactionRequest;
+import com.productdock.RBCAccountProject.models.entities.AccountEntity;
 import com.productdock.RBCAccountProject.models.entities.TransactionEntity;
 import com.productdock.RBCAccountProject.repositories.TransactionEntityRepository;
 import com.productdock.RBCAccountProject.services.AccountService;
@@ -47,12 +48,25 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public void insertLegacyData(com.productdock.RBCAccountProject.models.legacy.Transaction transaction, Account account) {
+       TransactionEntity entity = new TransactionEntity();
+       entity.setId(null);
+       entity.setDescription(transaction.getDescription());
+       entity.setCurrency(transaction.getAmount().getCurrency());
+       entity.setAmount(transaction.getAmount().getValue());
+       entity.setAccount(mapper.map(account, AccountEntity.class));
+        entity= repository.saveAndFlush(entity);
+        entityManager.refresh(entity);
+    }
+
+    @Override
     public Transaction insert(TransactionRequest request) throws NotFoundException, InvalidTransactionException {
         Account account = accountService.findById(request.getAccountId());
         processTransaction(account, request);
 
         TransactionEntity entity  = mapper.map(request, TransactionEntity.class);
         entity.setId(null);
+        entity.setCurrency(entity.getCurrency().toUpperCase());
         entity= repository.saveAndFlush(entity);
         entityManager.refresh(entity);
         return findById(entity.getId());
@@ -69,7 +83,7 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new InvalidTransactionException();
             }
         } else {
-            Double exchangedAmount =  currencyService.convertCurrency(requestedCurrency, account.getCurrency(), requestedAmount);
+            Double exchangedAmount =  currencyService.convertCurrency(requestedCurrency, account.getCurrency(), requestedAmount).getConvertedMoney();
             if (account.getBalance() >= exchangedAmount) {
                 account.setBalance(account.getBalance() - exchangedAmount);
             } else {

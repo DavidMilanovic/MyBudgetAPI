@@ -3,9 +3,11 @@ package com.productdock.RBCAccountProject.services.impl;
 import com.productdock.RBCAccountProject.exceptions.NotFoundException;
 import com.productdock.RBCAccountProject.models.Account;
 import com.productdock.RBCAccountProject.models.AccountRequest;
+import com.productdock.RBCAccountProject.models.AvailableMoney;
 import com.productdock.RBCAccountProject.models.entities.AccountEntity;
 import com.productdock.RBCAccountProject.repositories.AccountEntityRepository;
 import com.productdock.RBCAccountProject.services.AccountService;
+import com.productdock.RBCAccountProject.services.CurrencyService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -20,12 +22,14 @@ public class AccountServiceImpl implements AccountService {
 
     private final ModelMapper mapper;
     private final AccountEntityRepository repository;
+    private final CurrencyService currencyService;
     @PersistenceContext
     private EntityManager entityManager;
 
-    public AccountServiceImpl(ModelMapper mapper, AccountEntityRepository repository) {
+    public AccountServiceImpl(ModelMapper mapper, AccountEntityRepository repository, CurrencyService currencyService) {
         this.mapper = mapper;
         this.repository = repository;
+        this.currencyService = currencyService;
     }
 
     @Override
@@ -37,6 +41,7 @@ public class AccountServiceImpl implements AccountService {
     public Account findById(Integer id) throws NotFoundException {
         return mapper.map(repository.findById(id).orElseThrow(NotFoundException::new), Account.class);
     }
+
 
     @Override
     public Account insert(AccountRequest accountRequest) throws NotFoundException {
@@ -65,5 +70,21 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void deleteAll() {
         repository.deleteAll();
+    }
+
+    @Override
+    public AvailableMoney getAvailableMoney(String currency) {
+        List<Account> accounts = findAll();
+        double availableMoney = 0;
+        for(Account account : accounts){
+
+            if(account.getCurrency().equalsIgnoreCase(currency)){
+                availableMoney+=account.getBalance();
+            }
+            else{
+                availableMoney += currencyService.convertCurrency(account.getCurrency(), currency, account.getBalance()).getConvertedMoney();
+            }
+        }
+        return new AvailableMoney(availableMoney);
     }
 }
